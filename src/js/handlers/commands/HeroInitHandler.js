@@ -25,8 +25,9 @@ class HeroInitHandler {
       if (window.hero == null) {
         window.hero = new Hero(heroJson.x, heroJson.y, heroJson.factionId);
       }
-      f();
-      window.initialized = true;
+
+      window.BotWorkerInstance.init();
+      window.BotWorkerInstance.initialized = true;
     }
   }
 
