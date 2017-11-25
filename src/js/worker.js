@@ -179,17 +179,28 @@ class BotWorker  {
       y = MathUtils.random(58, 12830);
     }
 
-    if (api.targetShip) {
+    if (api.targetShip && window.settings.killNpcs) {
       api.targetShip.update();
       var dist = api.targetShip.distanceTo(window.hero.position);
 
-      if (dist > 1000 && (api.lockedShip == null || api.lockedShip.id != api.targetShip.id) && $.now() - api.lastMovement > 1000) {
+      if ((dist > 600 && (api.lockedShip == null || api.lockedShip.id != api.targetShip.id) && $.now() - api.lastMovement > 1000)) {
         x = api.targetShip.position.x - MathUtils.random(-50, 50);
         y = api.targetShip.position.y - MathUtils.random(-50, 50);
         api.lastMovement = $.now();
-      } else if (dist > 300 && api.lockedShip && api.lockedShip.id == api.targetShip.id) {
+      } else if (dist > 300 && api.lockedShip && api.lockedShip.id == api.targetShip.id & !window.settings.circleNpc) {
         x = api.targetShip.position.x + MathUtils.random(-200, 200);
         y = api.targetShip.position.y + MathUtils.random(-200, 200);
+      } else {
+        if (window.settings.circleNpc) {
+          //I'm not completely sure about this algorithm
+          let radius = 570;
+          let enemy = api.targetShip.position;
+          let f = Math.atan2(window.hero.position.x - enemy.x, window.hero.position.y - enemy.y) + 0.5;
+          let s = Math.PI / 180;
+          f += s;
+          x = enemy.x + radius * Math.sin(f);
+          y = enemy.y + radius * Math.cos(f);
+        }
       }
     }
 

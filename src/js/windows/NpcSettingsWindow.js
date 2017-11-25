@@ -14,7 +14,15 @@ class NpcSettingsWindow {
         event: function () {
           window.settings.killNpcs = this.checked;
         }
-      }
+      },
+      {
+        name: 'npcCircle',
+        labelText: 'Circle (Beta)',
+        appendTo: this.npcSettingsWindow,
+        event: function () {
+          window.settings.circleNpc = this.checked;
+        }
+      },
     ];
 
     this.knownNpcList.forEach((n, i) => {
