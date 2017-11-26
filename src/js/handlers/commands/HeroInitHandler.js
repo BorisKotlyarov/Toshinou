@@ -9,8 +9,6 @@ class HeroInitHandler {
 
   constructor(f) {
     this._handler = function(e, a) {
-
-      // FIXME? reconnect/revive bug? needs confiramtion
       a.ships = [];
       a.boxes = {};
       a.gates = [];
@@ -19,6 +17,7 @@ class HeroInitHandler {
       a.triedToLock = false;
       a.lockedShip = null;
       a.heroDied = false;
+      Injector.injectScript("window.heroDied = false;");
 
       var heroJson = JSON.parse(e.detail);
 

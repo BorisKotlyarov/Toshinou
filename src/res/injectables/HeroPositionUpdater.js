@@ -1,4 +1,6 @@
 window.setInterval(function() {
-  var response = document.getElementById("preloader").getHero();
-  document.dispatchEvent(new CustomEvent("updateHeroPos", {detail: response}));
+  if (!window.heroDied) {
+    var response = document.getElementById("preloader").getHero();
+    document.dispatchEvent(new CustomEvent("updateHeroPos", {detail: response}));
+  }
 }, 300);

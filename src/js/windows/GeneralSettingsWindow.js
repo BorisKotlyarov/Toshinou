@@ -73,7 +73,7 @@ class GeneralSettingsWindow {
         labelBefore: true,
         attrs: {
           min: 1,
-          max: 500,
+          max: 800,
           step: 1,
           value: 500,
         }

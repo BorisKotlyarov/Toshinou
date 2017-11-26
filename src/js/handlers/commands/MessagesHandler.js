@@ -19,8 +19,18 @@ class MessagesHandler {
             let s = e.wholeMessage.split("|");
             s.splice(0, 1);
             s = JSON.parse(s.join('|'));
-
             let message = s.message.split('|');
+
+            if("KIK" == message[1]){
+                a.isDisconected=true;
+                this.connection({connected: false, status: 'off'});
+            }
+
+            if("A" == message[1]){
+                a.isDisconected=true;
+                this.connection({connected: true, status: 'on'});
+            }
+
             if(_events.hasOwnProperty(message[3])){
                 this[_events[message[3]]](message);
             }
@@ -62,6 +72,10 @@ class MessagesHandler {
     honor(message){
         let event = new CustomEvent("addHonor",{ detail: { honor: message[4], totalHonor: message[5]} });
         window.dispatchEvent(event);
+    }
+
+    connection({connected, status}){
+        window.dispatchEvent(new CustomEvent("connection",{ detail: { connected, status } }));
     }
 
     get handler() {

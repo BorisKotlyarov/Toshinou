@@ -113,100 +113,102 @@ class BotWorker  {
   }
 
   logic(){
-    if (api.heroDied)
-      return;
-
-    window.minimap.draw();
-
-    if (api.targetBoxHash == null && api.targetShip == null) {
-      var box = api.findNearestBox();
-      var ship = api.findNearestShip();
-
-      if ((!ship || ship.distance > 1000 || !ship.ship) && (box && box.box)) {
-        api.collectBox(box.box);
-        api.targetBoxHash = box.box.hash;
-        return;
-      } else if (ship.ship && ship && ship.distance < 1000 && window.settings.killNpcs) {
-        api.lockShip(ship.ship);
-        api.triedToLock = true;
-        api.targetShip = ship.ship;
-        return;
-      } else if (ship.ship && ship && window.settings.killNpcs) {
-        ship.ship.update();
-        api.move(ship.ship.position.x - MathUtils.random(-50, 50), ship.ship.position.y - MathUtils.random(-50, 50));
-        api.targetShip = ship.ship;
-        return;
-      }
-    }
-
-    if (api.targetShip && window.settings.killNpcs) {
-      if (!api.triedToLock && (api.lockedShip == null || api.lockedShip.id != api.targetShip.id)) {
-        api.targetShip.update();
-        var dist = api.targetShip.distanceTo(window.hero.position);
-        if (dist < 1000) {
-          api.lockShip(api.targetShip);
-          api.triedToLock = true;
+      if (api.heroDied && api.isDisconected)
           return;
-        }
+
+      window.minimap.draw();
+
+      if (api.targetBoxHash == null && api.targetShip == null) {
+          var box = api.findNearestBox();
+          var ship = api.findNearestShip();
+
+          if ((!ship || ship.distance > 1000 || !ship.ship) && (box && box.box)) {
+              api.collectBox(box.box);
+              api.targetBoxHash = box.box.hash;
+              return;
+          } else if (ship.ship && ship && ship.distance < 1000 && window.settings.killNpcs) {
+              api.lockShip(ship.ship);
+              api.triedToLock = true;
+              api.targetShip = ship.ship;
+              return;
+          } else if (ship.ship && ship && window.settings.killNpcs) {
+              ship.ship.update();
+              api.move(ship.ship.position.x - MathUtils.random(-50, 50), ship.ship.position.y - MathUtils.random(-50, 50));
+              api.targetShip = ship.ship;
+              return;
+          }
       }
 
-      if (!api.attacking && api.lockedShip) {
-        api.startLaserAttack();
-        api.attacking = true;
-        return;
+      if (api.targetShip && window.settings.killNpcs) {
+          if (!api.triedToLock && (api.lockedShip == null || api.lockedShip.id != api.targetShip.id)) {
+              api.targetShip.update();
+              var dist = api.targetShip.distanceTo(window.hero.position);
+              if (dist < 1000) {
+                  api.lockShip(api.targetShip);
+                  api.triedToLock = true;
+                  return;
+              }
+          }
+
+          if (!api.attacking && api.lockedShip) {
+              api.startLaserAttack();
+              api.attacking = true;
+              return;
+          }
       }
-    }
 
-    if (api.targetBoxHash && $.now() - api.collectTime > 5000) {
-      delete api.boxes[api.targetBoxHash];
-      api.blackListHash(api.targetBoxHash);
-      api.targetBoxHash = null;
-    }
-
-    //HACK: npc stucks fallback
-    if (api.targetShip && $.now() - api.lockTime > 5000 && !api.attacking) {
-      api.targetShip = null;
-      api.attacking = false;
-      api.triedToLock = false;
-      api.lockedShip = null;
-    }
-
-    var x;
-    var y;
-
-    if (api.targetBoxHash == null && api.targetShip == null && window.movementDone && window.settings.moveRandomly) {
-      x = MathUtils.random(100, 20732);
-      y = MathUtils.random(58, 12830);
-    }
-
-    if (api.targetShip && window.settings.killNpcs) {
-      api.targetShip.update();
-      var dist = api.targetShip.distanceTo(window.hero.position);
-
-      if ((dist > 600 && (api.lockedShip == null || api.lockedShip.id != api.targetShip.id) && $.now() - api.lastMovement > 1000)) {
-        x = api.targetShip.position.x - MathUtils.random(-50, 50);
-        y = api.targetShip.position.y - MathUtils.random(-50, 50);
-        api.lastMovement = $.now();
-      } else if (dist > 300 && api.lockedShip && api.lockedShip.id == api.targetShip.id & !window.settings.circleNpc) {
-        x = api.targetShip.position.x + MathUtils.random(-200, 200);
-        y = api.targetShip.position.y + MathUtils.random(-200, 200);
-      } else {
-        if (window.settings.circleNpc) {
-          //I'm not completely sure about this algorithm
-          let enemy = api.targetShip.position;
-          let f = Math.atan2(window.hero.position.x - enemy.x, window.hero.position.y - enemy.y) + 0.5;
-          let s = Math.PI / 180;
-          f += s;
-          x = enemy.x + window.settings.npcCircleRadius * Math.sin(f);
-          y = enemy.y + window.settings.npcCircleRadius * Math.cos(f);
-        }
+      if (api.targetBoxHash && $.now() - api.collectTime > 5000) {
+          delete api.boxes[api.targetBoxHash];
+          api.blackListHash(api.targetBoxHash);
+          api.targetBoxHash = null;
       }
-    }
 
-    if (x && y) {
-      api.move(x, y);
-      window.movementDone = false;
-    }
+      //HACK: npc stucks fallback
+      if (api.targetShip && $.now() - api.lockTime > 5000 && !api.attacking) {
+          api.targetShip = null;
+          api.attacking = false;
+          api.triedToLock = false;
+          api.lockedShip = null;
+      }
+
+      var x;
+      var y;
+
+      if (api.targetBoxHash == null && api.targetShip == null && window.movementDone && window.settings.moveRandomly) {
+          x = MathUtils.random(100, 20732);
+          y = MathUtils.random(58, 12830);
+      }
+
+      if (api.targetShip && window.settings.killNpcs) {
+          api.targetShip.update();
+          var dist = api.targetShip.distanceTo(window.hero.position);
+
+          if ((dist > 600 && (api.lockedShip == null || api.lockedShip.id != api.targetShip.id) && $.now() - api.lastMovement > 1000)) {
+              x = api.targetShip.position.x - MathUtils.random(-50, 50);
+              y = api.targetShip.position.y - MathUtils.random(-50, 50);
+              api.lastMovement = $.now();
+          } else if (dist > 300 && api.lockedShip && api.lockedShip.id == api.targetShip.id & !window.settings.circleNpc) {
+              x = api.targetShip.position.x + MathUtils.random(-200, 200);
+              y = api.targetShip.position.y + MathUtils.random(-200, 200);
+          } else {
+              if (window.settings.circleNpc) {
+                  //I'm not completely sure about this algorithm
+                  let enemy = api.targetShip.position;
+                  let f = Math.atan2(window.hero.position.x - enemy.x, window.hero.position.y - enemy.y) + 0.5;
+                  let s = Math.PI / 180;
+                  f += s;
+                  x = enemy.x + window.settings.npcCircleRadius * Math.sin(f);
+                  y = enemy.y + window.settings.npcCircleRadius * Math.cos(f);
+              }
+          }
+      }
+
+      if (x && y) {
+          api.move(x, y);
+          window.movementDone = false;
+      }
+
+      window.dispatchEvent(new CustomEvent("logicEnd"));
   }
 
 }

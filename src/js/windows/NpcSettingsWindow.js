@@ -4,7 +4,7 @@ Created by Freshek on 11.11.2017
 
 class NpcSettingsWindow {
   createWindow() {
-    this.npcSettingsWindow = WindowFactory.createWindow({ width: 300, maxHeight: 100, text: "NPC Killer Settings" });
+    this.npcSettingsWindow = WindowFactory.createWindow({ width: 300, maxHeight: 100, text: "Exclude NPC to attack" });
 
     let controls = [];
 

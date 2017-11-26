@@ -66,6 +66,6 @@ class Settings {
   }
 
   getNpc(name) {
-    return this._npcs[name] == true;
+    return this._npcs.indexOf(name) === -1;
   }
 }
