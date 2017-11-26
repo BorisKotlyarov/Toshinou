@@ -6,24 +6,7 @@ class NpcSettingsWindow {
   createWindow() {
     this.npcSettingsWindow = WindowFactory.createWindow({ width: 300, maxHeight: 100, text: "NPC Killer Settings" });
 
-    let controls = [
-      {
-        name: 'npcKiller',
-        labelText: 'Enable NPC killer (experimental)',
-        appendTo: this.npcSettingsWindow,
-        event: function () {
-          window.settings.killNpcs = this.checked;
-        }
-      },
-      {
-        name: 'npcCircle',
-        labelText: 'Circle (Beta)',
-        appendTo: this.npcSettingsWindow,
-        event: function () {
-          window.settings.circleNpc = this.checked;
-        }
-      },
-    ];
+    let controls = [];
 
     this.knownNpcList.forEach((n, i) => {
 

@@ -193,13 +193,12 @@ class BotWorker  {
       } else {
         if (window.settings.circleNpc) {
           //I'm not completely sure about this algorithm
-          let radius = 570;
           let enemy = api.targetShip.position;
           let f = Math.atan2(window.hero.position.x - enemy.x, window.hero.position.y - enemy.y) + 0.5;
           let s = Math.PI / 180;
           f += s;
-          x = enemy.x + radius * Math.sin(f);
-          y = enemy.y + radius * Math.cos(f);
+          x = enemy.x + window.settings.npcCircleRadius * Math.sin(f);
+          y = enemy.y + window.settings.npcCircleRadius * Math.cos(f);
         }
       }
     }

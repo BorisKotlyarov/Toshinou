@@ -1,69 +1,78 @@
 /*
 Created by Freshek on 07.10.2017
 */
+
+// Proposal: Rename all "window" mentions to "pane" in order to have
+// less confusion with JS window object.
+
+const HEADER_HEIGHT = 40;
+const ANIMATION_DURATION_MS = 400;
+
 class WindowFactory {
-
   static createWindow(params) {
-    var div = jQuery("<div/>", {
-      width: params.width != null ? params.width : 400,
-      height: params.height != null ? params.height + 40:'',
-    });
+    const pane = jQuery('<div>', {
+      width: params.width || 400,
+      height: (params.height + HEADER_HEIGHT) || '',
+      'class': 'window',
+      css: {
+        backgroundColor: 'transparent',
+        position: 'fixed',
+      },
+    }).appendTo('body');
 
-    div.attr("class", "window");
+    const headerCol = ColorConverter.hexToRgb(window.globalSettings.headerColor);
+    const header = jQuery('<h4>', {
+      text: params.text || 'Untitled',
+      'class': 'header',
+      css: {
+        backgroundColor: ColorConverter.combine(headerCol.r, headerCol.g, headerCol.b, window.globalSettings.headerOpacity),
+      },
+    }).appendTo(pane);
 
-    var content = jQuery("<div/>");
+    // TODO: Custom scrollbar
+    const contentColor = ColorConverter.hexToRgb(window.globalSettings.windowColor);
+    const content = jQuery('<div>', {
+      'class': 'content',
+      css: {
+        maxHeight: params.maxHeight || '',
+        backgroundColor: ColorConverter.combine(contentColor.r, contentColor.g, contentColor.b, window.globalSettings.windowOpacity),
+      },
+    }).appendTo(pane);
 
-    content.attr("class", "content");
+    const minimizeBtn = jQuery('<span>', {
+      text: '_',
+      'class': 'minimize-btn',
+    }).appendTo(header);
 
-    if (params.maxHeight)
-      content.css("max-height", params.maxHeight + "px");
-
-    if (params.height)
-      content.css("height", params.height - 2 + "px"); //FIXME: adjust the style.css in order to prevent situations like these…
-
-    var header = jQuery("<h4/>", {
-      text: params.text != null ? params.text : "window"
-    });
-
-    header.attr("class", "header");
-
-    var minimizeBtn = jQuery("<span/>", {
-      text: "_"
-    });
-
-    minimizeBtn.attr("class", "minimize-btn");
-
-    div.css({backgroundColor: "transparent", position: "absolute"});
-    div.appendTo("body");
-
-    var headerCol = ColorConverter.hexToRgb(window.globalSettings.headerColor);
-    header.css({backgroundColor: ColorConverter.combine(headerCol.r, headerCol.g, headerCol.b, window.globalSettings.headerOpacity)});
-    header.appendTo(div);
-
-    minimizeBtn.appendTo(header);
-
-    var bgCol = ColorConverter.hexToRgb(window.globalSettings.windowColor);
-    content.css({backgroundColor: ColorConverter.combine(bgCol.r, bgCol.g, bgCol.b, window.globalSettings.windowOpacity)});
-    content.appendTo(div);
-
-    minimizeBtn.click(function() {
-      if (content.css("display") !== "none") {
-        content.fadeOut(500, function() {
-          if (params.height) { //HACK: another hack, I hate CSS
-            div.css("height", 40);
-          }
+    minimizeBtn.click(() => {
+      if (content.is(':visible')) {
+        content.slideUp(ANIMATION_DURATION_MS)
+        .animate({
+          opacity: 0,
+        }, {
+          queue: false,
+          duration: ANIMATION_DURATION_MS,
         });
-      }
-      else {
-        content.fadeIn(500, function() {
-          if (params.height) { //HACK: please, someone, fix it
-            div.css("height", params.height + 40);
-          }
+      } else {
+        content.slideDown(ANIMATION_DURATION_MS)
+        .animate({
+          opacity: window.globalSettings.windowOpacity ,
+        }, {
+          queue: false,
+          duration: ANIMATION_DURATION_MS,
         });
       }
     });
 
-    div.draggable({handle: header});
+    pane.draggable({
+      handle: header,
+      drag: (e, ui) => {
+        ui.position.left = Math.max(-pane.width() / 2, ui.position.left);
+        ui.position.left = Math.min(ui.position.left, $(window).width() - pane.width() / 2);
+        ui.position.top = Math.max(-HEADER_HEIGHT / 2, ui.position.top);
+        ui.position.top = Math.min(ui.position.top, $(window).height() - HEADER_HEIGHT / 2);
+      }
+    });
 
     return content;
   }
