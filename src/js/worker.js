@@ -72,7 +72,7 @@ class BotWorker  {
     let windowsObjects = {
       'minimap': {class: Minimap, args: api},
       'attackWindow': {class: AttackWindow, args: {}},
-      'collectingWindow': {class: CollectingWindow, args: {}},
+      'collectingWindow': {class: GeneralSettingsWindow, args: {}},
       'autolockWindow': {class: AutolockWindow, args: {}},
       'npcSettingsWindow': {class: NpcSettingsWindow, args: {}},
       'statisticWindow': {class: StatisticWindow, args: {}},
