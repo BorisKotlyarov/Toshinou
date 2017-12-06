@@ -9,6 +9,7 @@ class HeroInitHandler {
 
   constructor(f) {
     this._handler = function(e, a) {
+      e.detail = e.wholeMessage.split("|").slice(1).join("");
       a.ships = [];
       a.boxes = {};
       a.gates = [];
@@ -17,13 +18,19 @@ class HeroInitHandler {
       a.triedToLock = false;
       a.lockedShip = null;
       a.heroDied = false;
+      a.targetBoxHash = null;
       Injector.injectScript("window.heroDied = false;");
 
       var heroJson = JSON.parse(e.detail);
 
       if (window.hero == null) {
-        window.hero = new Hero(heroJson.x, heroJson.y, heroJson.factionId);
+        window.hero = new Hero(heroJson.x, heroJson.y, heroJson.factionId, heroJson.userId);
       }
+
+      window.hero.maxHp = heroJson[Variables.heroInitMaxHp];
+      window.hero.hp = heroJson[Variables.heroInitHp];
+      window.hero.maxShd = heroJson[Variables.heroInitMaxShd];
+      window.hero.shd = heroJson["shield"];
 
       window.BotWorkerInstance.init();
       window.BotWorkerInstance.initialized = true;

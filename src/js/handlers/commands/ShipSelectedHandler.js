@@ -12,6 +12,12 @@ class ShipSelectedHandler {
       var parsedJson = JSON.parse(e.detail);
 
       var ship = a.ships[parsedJson.userId];
+
+      ship.maxHp = parsedJson[Variables.selectMaxHp];
+      ship.maxShd = parsedJson[Variables.selectMaxShd];
+      ship.hp = parsedJson[Variables.selectHp];
+      ship.shd = parsedJson.shield;
+
       if (ship != null)
         a.lockedShip = ship;
     }

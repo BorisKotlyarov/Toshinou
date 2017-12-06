@@ -27,6 +27,10 @@ class BoxType {
     return "PIRATE_BOOTY_GOLD";
   }
 
+  static get giftBox() {
+    return "GIFT_BOXES";
+  }
+
   static get colors() {
     var ret = {};
     ret[BoxType.bonusBox] = "yellow";
@@ -35,6 +39,7 @@ class BoxType {
     ret[BoxType.pirateBootyRed] = "red";
     ret[BoxType.pirateBootyBlue] = "blue";
     ret[BoxType.pirateBootyGold] = "gold";
+    ret[BoxType.giftBox] = "blue";
 
     return ret;
   }

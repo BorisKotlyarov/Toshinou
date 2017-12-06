@@ -92,9 +92,26 @@ class StatisticWindow {
                 if (window.globalSettings.showRuntime) {
                     $('span:last-child', this.runtime).text(TimeHelper.diff(startTime));
                 }
-                $('span:last-child', this.speed).text((uri ? ( uri / TimeHelper.totatalMinutes(startTime)).toFixed(2) : '0.00') + '  uri/min.');
+
+                $('span:last-child', this.speed).text(this.speedFormat(uri, startTime));
             }
         });
+    }
+
+    speedFormat(uri, startTime){
+
+        let timeMinutes = TimeHelper.totalMinutes(startTime);
+        let curFormat = window.globalSettings.speedFormat;
+
+        let formats = {
+            min: ( uri / timeMinutes ).toFixed(2),
+            hour: ( ( uri / timeMinutes)*60 ).toFixed(2),
+        };
+
+        let result = uri>0 & timeMinutes>0 ? formats[curFormat]:'0.00';
+        result += `  uri/${curFormat}`;
+
+        return result;
     }
 
     setStandardEventListener({event, el, detailEl}) {

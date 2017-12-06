@@ -18,6 +18,10 @@
         <input type="color" id="windowColor" value="#16262f"></label>
       <label> | opacity
         <input type="range" id="windowOpacity" min="0" max="1" step="0.01" value="0.8"></label>
+      <br>
+
+      <input type="checkbox" id="windowsToTabs" /><label for="windowsToTabs">Tabs instead of windows</label>
+
       <hr>
       <h4>Advanced (beginners, go away!)</h4>
       <label>Logic tick (ms)
@@ -27,7 +31,18 @@
       <h4>Statistic window</h4>
       <input type="checkbox" id="showRuntime" /><label for="showRuntime">Show runtime</label>
       <br>
+
+      <h5>Speed format</h5>
+      <input type="radio" id="speedFormat_min" name="speedFormat" value="min">
+      <label for="speedFormat_min">uri/min.</label><br>
+
+      <input type="radio" id="speedFormat_hour" name="speedFormat" value="hour" checked>
+      <label for="speedFormat_hour">uri/hour</label>
+
       <hr>
+
+
+
       <input type="submit" value="save">
     </form>
 

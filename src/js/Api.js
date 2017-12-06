@@ -75,12 +75,16 @@ class Api {
   findNearestBox() {
     var minDist = 100000;
     var finalBox;
+
+    if (!window.settings.collectBoxes && !window.settings.collectMaterials)
+      return {box: null, distance: minDist};
+
     for (var property in this.boxes) {
       var box = this.boxes[property];
       var dist = box.distanceTo(window.hero.position);
 
       if (dist < minDist) {
-        if (((box.type == "BONUS_BOX" || box.type == "MINI_PUMPKIN" || box.type == "TURKISH_FLAG") && window.settings.collectBoxes) || (box.isMaterial() && window.settings.collectMaterials)) {
+        if ((box.isCollectable() && window.settings.collectBoxes) || (box.isMaterial() && window.settings.collectMaterials)) {
           finalBox = box;
           minDist = dist;
         }
@@ -92,6 +96,10 @@ class Api {
   findNearestShip() {
     var minDist = 100000;
     var finalShip;
+
+    if (!window.settings.killNpcs)
+      return {ship: null, distance: minDist};
+
     for (var property in this.ships) {
       var ship = this.ships[property];
       ship.update();
@@ -106,6 +114,21 @@ class Api {
     }
 
     return {ship: finalShip, distance: minDist};
+  }
+
+  findNearestGate() {
+    var minDist = 100000;
+    var finalGate;
+
+    this.gates.forEach(gate => {
+      var dist = window.hero.distanceTo(gate.position);
+      if (dist < minDist) {
+        finalGate = gate;
+        minDist = dist;
+      }
+    });
+
+    return {gate: finalGate, distance: minDist};
   }
 
   markHeroAsDead() {

@@ -28,12 +28,9 @@ class BotWorker  {
 
     preloader.appendTo($("#container"));
 
-    var userIdPttrn = /userID=([0-9]+)/g;
-    var flashVars = document.querySelectorAll('[name="flashvars"]')[0].getAttribute("value");
-    window.userId = userIdPttrn.exec(flashVars)[1];
-
     window.settings = new Settings();
-    this.initialized = false;
+    window.initialized = false;
+    window.reviveCount = 0;
 
     window.movementDone = true;
 
@@ -51,6 +48,8 @@ class BotWorker  {
       'GateInitHandler': {class: GateInitHandler, args: {}},
       'ShipSelectedHandler': {class: ShipSelectedHandler, args: {}},
       'MessagesHandler': {class: MessagesHandler, args: {}},
+      'HeroDiedHandler': {class: HeroDiedHandler, args: {}},
+      'HeroUpdateHitpointsHandler': {class: HeroUpdateHitpointsHandler, args: {}},
     };
 
     Object.keys(commands).forEach((item)=>{
@@ -72,7 +71,7 @@ class BotWorker  {
     let windowsObjects = {
       'minimap': {class: Minimap, args: api},
       'attackWindow': {class: AttackWindow, args: {}},
-      'collectingWindow': {class: GeneralSettingsWindow, args: {}},
+      'generalSettingsWindow': {class: GeneralSettingsWindow, args: {}},
       'autolockWindow': {class: AutolockWindow, args: {}},
       'npcSettingsWindow': {class: NpcSettingsWindow, args: {}},
       'statisticWindow': {class: StatisticWindow, args: {}},
@@ -113,25 +112,43 @@ class BotWorker  {
   }
 
   logic(){
+      if (api.isRepairing && window.hero.hp !== window.hero.maxHp) {
+          return;
+      } else if (api.isRepairing && window.hero.hp === window.hero.maxHp) {
+          api.isRepairing = false;
+      }
+
       if (api.heroDied && api.isDisconected)
           return;
 
       window.minimap.draw();
 
       if (api.targetBoxHash == null && api.targetShip == null) {
+          if (MathUtils.percentFrom(window.hero.hp, window.hero.maxHp) < window.settings.repairWhenHpIsLowerThanPercent) {
+              let gate = api.findNearestGate();
+              if (gate.gate) {
+                  let x = gate.gate.position.x;
+                  let y = gate.gate.position.y;
+                  api.isRepairing = true;
+                  api.move(x, y);
+                  window.movementDone = false;
+                  return;
+              }
+          }
+
           var box = api.findNearestBox();
           var ship = api.findNearestShip();
 
-          if ((!ship || ship.distance > 1000 || !ship.ship) && (box && box.box)) {
+          if ((ship.distance > 1000 || !ship.ship) && (box.box)) {
               api.collectBox(box.box);
               api.targetBoxHash = box.box.hash;
               return;
-          } else if (ship.ship && ship && ship.distance < 1000 && window.settings.killNpcs) {
+          } else if (ship.ship && ship.distance < 1000 && window.settings.killNpcs) {
               api.lockShip(ship.ship);
               api.triedToLock = true;
               api.targetShip = ship.ship;
               return;
-          } else if (ship.ship && ship && window.settings.killNpcs) {
+          } else if (ship.ship && window.settings.killNpcs) {
               ship.ship.update();
               api.move(ship.ship.position.x - MathUtils.random(-50, 50), ship.ship.position.y - MathUtils.random(-50, 50));
               api.targetShip = ship.ship;
@@ -143,7 +160,7 @@ class BotWorker  {
           if (!api.triedToLock && (api.lockedShip == null || api.lockedShip.id != api.targetShip.id)) {
               api.targetShip.update();
               var dist = api.targetShip.distanceTo(window.hero.position);
-              if (dist < 1000) {
+              if (dist < 600) {
                   api.lockShip(api.targetShip);
                   api.triedToLock = true;
                   return;
@@ -158,9 +175,14 @@ class BotWorker  {
       }
 
       if (api.targetBoxHash && $.now() - api.collectTime > 5000) {
-          delete api.boxes[api.targetBoxHash];
-          api.blackListHash(api.targetBoxHash);
-          api.targetBoxHash = null;
+          let box = api.boxes[api.targetBoxHash];
+          if (box && box.distanceTo(window.hero.position) > 1000) {
+              api.collecTime = $.now();
+          } else {
+              delete api.boxes[api.targetBoxHash];
+              api.blackListHash(api.targetBoxHash);
+              api.targetBoxHash = null;
+          }
       }
 
       //HACK: npc stucks fallback
@@ -179,7 +201,7 @@ class BotWorker  {
           y = MathUtils.random(58, 12830);
       }
 
-      if (api.targetShip && window.settings.killNpcs) {
+      if (api.targetShip && window.settings.killNpcs && api.targetBoxHash == null) {
           api.targetShip.update();
           var dist = api.targetShip.distanceTo(window.hero.position);
 
@@ -187,10 +209,15 @@ class BotWorker  {
               x = api.targetShip.position.x - MathUtils.random(-50, 50);
               y = api.targetShip.position.y - MathUtils.random(-50, 50);
               api.lastMovement = $.now();
+          } else if (api.lockedShip && api.lockedShip.percentOfHp < 15 && api.lockedShip.id == api.targetShip.id && window.settings.dontCircleWhenHpBelow15Percent) {
+              if (dist > 450) {
+                  x = api.targetShip.position.x + MathUtils.random(-30, 30);
+                  y = api.targetShip.position.y + MathUtils.random(-30, 30);
+              }
           } else if (dist > 300 && api.lockedShip && api.lockedShip.id == api.targetShip.id & !window.settings.circleNpc) {
               x = api.targetShip.position.x + MathUtils.random(-200, 200);
               y = api.targetShip.position.y + MathUtils.random(-200, 200);
-          } else {
+          } else if (api.lockedShip && api.lockedShip.id == api.targetShip.id) {
               if (window.settings.circleNpc) {
                   //I'm not completely sure about this algorithm
                   let enemy = api.targetShip.position;
@@ -200,6 +227,11 @@ class BotWorker  {
                   x = enemy.x + window.settings.npcCircleRadius * Math.sin(f);
                   y = enemy.y + window.settings.npcCircleRadius * Math.cos(f);
               }
+          } else { // ??? there must be something wrong with our locked npc
+              api.targetShip = null;
+              api.attacking = false;
+              api.triedToLock = false;
+              api.lockedShip = null;
           }
       }
 
@@ -209,7 +241,7 @@ class BotWorker  {
       }
 
       window.dispatchEvent(new CustomEvent("logicEnd"));
-  }
+}
 
 }
 

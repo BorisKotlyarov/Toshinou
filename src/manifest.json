@@ -18,6 +18,8 @@
         "js/utils/ResourcesManager.js",
         "js/utils/Injector.js",
         "js/utils/Variables.js",
+        "js/utils/DragAndDrop.js",
+        "js/utils/TabsHelper.js",
         "js/preferences/Settings.js",
         "js/preferences/GlobalSettings.js",
         "js/utils/math/Vector2D.js",
@@ -53,6 +55,7 @@
         "js/handlers/commands/ShipSelectedHandler.js",
         "js/handlers/commands/MessagesHandler.js",
         "js/handlers/commands/HeroDiedHandler.js",
+        "js/handlers/commands/HeroUpdateHitpointsHandler.js",
         "js/Api.js",
         "js/ControlFactory.js",
         "js/worker.js"

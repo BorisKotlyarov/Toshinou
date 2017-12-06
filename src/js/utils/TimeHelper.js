@@ -26,7 +26,7 @@ class TimeHelper {
         return days + result.join(':');
     }
 
-    static totatalMinutes(time){
+    static totalMinutes(time){
         let ms_diff = new Date().getTime() - time.getTime();
         return Math.floor(ms_diff / 1000 / 60);
     }

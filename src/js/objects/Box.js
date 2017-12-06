@@ -17,4 +17,9 @@ class Box extends Movable {
     var type = this.type.toLowerCase();
     return (type == "mucosum" || type == "prismatium" || type == "scrapium" || type == "boltrum");
   }
+
+  isCollectable() {
+    var type = this.type;
+    return (type == "BONUS_BOX" || type == "MINI_PUMPKIN" || type == "TURKISH_FLAG" || type == "GIFT_BOXES");
+  }
 }

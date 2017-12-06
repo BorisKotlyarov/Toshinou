@@ -66,7 +66,17 @@ class NpcSettingsWindow {
       "( UberKristallin )",
       "( UberKristallon )",
       "( UberStreuneR )",
+      "( Uber Interceptor )",
+      "( Uber Barracuda )",
+      "( Uber Saboteur )",
+      "( Uber Annihilator )",
+      "( Uber Battleray )",
+      "<=< Icy >=>",
+      "<=< Ice Meteoroid >=>",
+      "<=< Gygerthrall >=>",
+      "<=< Blighted Gygerthrall >=>",
       "-=[ Blighted Kristallon ]=-",
+      "<=< Plagued Gygerthrall >=>",
       "-=[ Plagued Kristallin ]=-",
       "-=[ Plague Rocket ]=-"
     ];

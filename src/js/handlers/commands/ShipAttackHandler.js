@@ -9,12 +9,27 @@ class ShipAttackHandler {
 
   constructor() {
     this._handler = function(e, a) {
-      var shipAttackCmd = JSON.parse(e.detail);
-      // TODO: Make this cleaner – create a Ship object
-      if (shipAttackCmd[Variables.attackerId] == window.userId) { //attacker id
+      let shipAttackCmd = JSON.parse(e.detail);
+
+      let attackerId = shipAttackCmd[Variables.attackerId];
+      let attackedShipId = shipAttackCmd[Variables.attackedId];
+
+      let ship = a.ships[attackedShipId];
+
+      if (attackerId == window.hero.id) {
         window.attackWindow.hp(shipAttackCmd[Variables.attackHp]);
         window.attackWindow.shd(shipAttackCmd[Variables.attackShd]);
-        window.attackWindow.targetName(a.ships[shipAttackCmd[Variables.attackedId]].name);
+        window.attackWindow.targetName(ship.name);
+      }
+
+      if (attackedShipId == window.hero.id) {
+        window.hero.hp = shipAttackCmd[Variables.attackHp];
+        window.hero.shd = shipAttackCmd[Variables.attackShd];
+      }
+
+      if (ship) {
+        ship.hp = shipAttackCmd[Variables.attackHp];
+        ship.shd = shipAttackCmd[Variables.attackShd];
       }
     }
   }

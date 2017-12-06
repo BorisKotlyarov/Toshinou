@@ -21,6 +21,10 @@ class Ship extends Movable {
     return window.hero.factionId != this.factionId;
   }
 
+  get percentOfHp() {
+    return (this.hp && this.maxHp) ? MathUtils.percentFrom(this.hp, this.maxHp) : 100;
+  }
+
   update() {
     if (this.target == null)
       return;

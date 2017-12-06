@@ -15,7 +15,7 @@ class AssetRemovedHandler {
         a.targetBoxHash = null;
       }
 
-      if (parsedCmd.hash in a.boxes) {
+      if (a.boxes.hasOwnProperty(parsedCmd.hash)) {
         delete a.boxes[parsedCmd.hash];
       }
     }

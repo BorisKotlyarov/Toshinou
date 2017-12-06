@@ -10,4 +10,8 @@ class MathUtils {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min;
   }
+
+  static percentFrom(val, val2) {
+    return (val / val2) * 100;
+  }
 }
