@@ -11,6 +11,12 @@ class BotWorker  {
     this.logics = [];
     this.windows = {};
 
+    this.map = {
+      width: 20732,
+      heigth: 12830,
+    };
+
+
     this.api = new Api();
 
     var preloader = $("#preloader").attr("wmode", "opaque");
@@ -79,6 +85,7 @@ class BotWorker  {
       'autolockWindow': {class: AutolockWindow, args: {}},
       'npcSettingsWindow': {class: NpcSettingsWindow, args: {}},
       'statisticWindow': {class: StatisticWindow, args: {}},
+      'GGWindow': {class: GGWindow, args: {}},
     };
 
     Object.keys(windowsObjects).forEach((item)=>{

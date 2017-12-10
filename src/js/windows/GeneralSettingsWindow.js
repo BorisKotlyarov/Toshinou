@@ -121,6 +121,7 @@ class GeneralSettingsWindow {
           window.settings.reviveAtGate = this.checked;
         }
       },
+
       {
         name: 'reviveLimit',
         labelText: 'Revive limit <span> (5)</span>',
@@ -137,7 +138,15 @@ class GeneralSettingsWindow {
           window.settings.reviveLimit = this.value;
           $('span:last-child', this.label).text(' (' + this.value + ')');
         }
-      }
+      },
+      {
+        name: 'noddGate',
+        labelText: 'Не добивать',
+        appendTo: this.botSettingsWindow,
+        event: function () {
+          window.settings.noddGate = this.checked;
+        }
+      },
     ];
 
     controls.forEach((control)=>{
@@ -235,14 +244,12 @@ class GeneralSettingsWindow {
 
   randomMove(){
     if(this.api.targetBoxHash == null && this.api.targetShip == null && window.movementDone && window.settings.moveRandomly) {
-      this.x = MathUtils.random(100, 20732);
-      this.y = MathUtils.random(58, 12830);
+      this.x = MathUtils.random(100, this.map.width);
+      this.y = MathUtils.random(58, this.map.heigth);
     }
   }
 
   killNpcsLogic(){
-
-    let y;
 
     if (this.api.targetShip && window.settings.killNpcs && this.api.targetBoxHash == null) {
       this.api.targetShip.update();
@@ -277,6 +284,11 @@ class GeneralSettingsWindow {
         this.api.lockedShip = null;
       }
     }
+
+    if(window.settings.noddGate && this.api.lockedShip.percentOfHp < 15){
+      window.settings.noddGate
+    }
+
   }
 
 }

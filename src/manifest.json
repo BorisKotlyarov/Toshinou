@@ -35,6 +35,7 @@
         "js/windows/AutolockWindow.js",
         "js/windows/NpcSettingsWindow.js",
         "js/windows/StatisticWindow.js",
+        "js/windows/GG.js",
         "js/objects/Movable.js",
         "js/objects/Box.js",
         "js/objects/Hero.js",
