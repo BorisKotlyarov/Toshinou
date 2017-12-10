@@ -27,6 +27,10 @@ class ShipAttackHandler {
         window.hero.shd = shipAttackCmd[Variables.attackShd];
       }
 
+      if (api.targetShip && attackedShipId == api.targetShip.id) {
+        api.lastAttack = $.now();
+      }
+
       if (ship) {
         ship.hp = shipAttackCmd[Variables.attackHp];
         ship.shd = shipAttackCmd[Variables.attackShd];

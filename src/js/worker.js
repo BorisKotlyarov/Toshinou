@@ -181,12 +181,13 @@ class BotWorker  {
         }
       }
 
-      if (!api.attacking && api.lockedShip) {
-        api.startLaserAttack();
-        api.attacking = true;
-        return;
-      }
+    if (!api.attacking && api.lockedShip) {
+      api.startLaserAttack();
+      api.lastAttack = $.now();
+      api.attacking = true;
+      return;
     }
+  }
 
   if (api.targetBoxHash && $.now() - api.collectTime > 5000) {
     let box = api.boxes[api.targetBoxHash];
@@ -199,13 +200,13 @@ class BotWorker  {
     }
   }
 
-    //HACK: npc stucks fallback
-    if (api.targetShip && $.now() - api.lockTime > 5000 && !api.attacking) {
-      api.targetShip = null;
-      api.attacking = false;
-      api.triedToLock = false;
-      api.lockedShip = null;
-    }
+  //HACK: npc stucks fallback
+  if ((api.targetShip && $.now() - api.lockTime > 5000 && !api.attacking) || $.now() - api.lastAttack > 25000) {
+    api.targetShip = null;
+    api.attacking = false;
+    api.triedToLock = false;
+    api.lockedShip = null;
+  }
 
     var x;
     var y;
