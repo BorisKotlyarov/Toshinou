@@ -145,7 +145,7 @@ class GeneralSettingsWindow {
     });
 
     this._parent.logics.push({ priority: 0, action: this.reviveLogic });
-    this._parent.logics.push({ priority: 1, action: this.reviveLogic });
+    this._parent.logics.push({ priority: 10, action: this.killNpcsLogic });
   }
 
   reviveLogic(){
@@ -183,6 +183,27 @@ class GeneralSettingsWindow {
       }
     }
 
+  }
+
+  killNpcsLogic(){
+    if (this.api.targetShip && window.settings.killNpcs) {
+      if (!this.api.triedToLock && (this.api.lockedShip == null || this.api.lockedShip.id != this.api.targetShip.id)) {
+        this.api.targetShip.update();
+        var dist = this.api.targetShip.distanceTo(window.hero.position);
+        if (dist < 600) {
+          this.api.lockShip(this.api.targetShip);
+          this.api.triedToLock = true;
+          return;
+        }
+      }
+
+      if (!this.api.attacking && this.api.lockedShip) {
+        this.api.startLaserAttack();
+        this.api.lastAttack = $.now();
+        this.api.attacking = true;
+        return;
+      }
+    }
   }
 
 }

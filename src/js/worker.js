@@ -137,27 +137,6 @@ class BotWorker  {
       logic.action.call(this);
     });
 
-   //
-
-    if (this.api.targetShip && window.settings.killNpcs) {
-      if (!this.api.triedToLock && (this.api.lockedShip == null || this.api.lockedShip.id != this.api.targetShip.id)) {
-        this.api.targetShip.update();
-        var dist = this.api.targetShip.distanceTo(window.hero.position);
-        if (dist < 600) {
-          this.api.lockShip(this.api.targetShip);
-          this.api.triedToLock = true;
-          return;
-        }
-      }
-
-    if (!this.api.attacking && this.api.lockedShip) {
-      this.api.startLaserAttack();
-      this.api.lastAttack = $.now();
-      this.api.attacking = true;
-      return;
-    }
-  }
-
   if (this.api.targetBoxHash && $.now() - this.api.collectTime > 5000) {
     let box = this.api.boxes[this.api.targetBoxHash];
     if (box && box.distanceTo(window.hero.position) > 1000) {
