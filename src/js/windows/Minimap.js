@@ -4,7 +4,7 @@ Created by Freshek on 07.10.2017
 
 class Minimap {
   constructor(options) {
-    this._api = options;
+    this._api = options.api;
     this._parent = options.parent;
   }
 

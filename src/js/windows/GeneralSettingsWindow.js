@@ -3,6 +3,11 @@ Created by Freshek on 14.10.2017
 */
 
 class GeneralSettingsWindow {
+
+  constructor(options){
+    this._parent = options.parent;
+  }
+
   createWindow() {
     this.botSettingsWindow = WindowFactory.createWindow({width: 300, text: "General"});
 
@@ -138,5 +143,46 @@ class GeneralSettingsWindow {
     controls.forEach((control)=>{
       this[control.name] = ControlFactory.createControl(control);
     });
+
+    this._parent.logics.push({ priority: 0, action: this.reviveLogic });
+    this._parent.logics.push({ priority: 1, action: this.reviveLogic });
   }
+
+  reviveLogic(){
+
+    if (this.api.targetBoxHash == null && this.api.targetShip == null) {
+      if (MathUtils.percentFrom(window.hero.hp, window.hero.maxHp) < window.settings.repairWhenHpIsLowerThanPercent) {
+        let gate = this.api.findNearestGate();
+        if (gate.gate) {
+          let x = gate.gate.position.x;
+          let y = gate.gate.position.y;
+          this.api.isRepairing = true;
+          this.api.move(x, y);
+          window.movementDone = false;
+          return;
+        }
+      }
+
+      var box = this.api.findNearestBox();
+      var ship = this.api.findNearestShip();
+
+      if ((ship.distance > 1000 || !ship.ship) && (box.box)) {
+        this.api.collectBox(box.box);
+        this.api.targetBoxHash = box.box.hash;
+        return;
+      } else if (ship.ship && ship.distance < 1000 && window.settings.killNpcs) {
+        this.api.lockShip(ship.ship);
+        this.api.triedToLock = true;
+        this.api.targetShip = ship.ship;
+        return;
+      } else if (ship.ship && window.settings.killNpcs) {
+        ship.ship.update();
+        this.api.move(ship.ship.position.x - MathUtils.random(-50, 50), ship.ship.position.y - MathUtils.random(-50, 50));
+        this.api.targetShip = ship.ship;
+        return;
+      }
+    }
+
+  }
+
 }
