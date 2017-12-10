@@ -149,6 +149,7 @@ class GeneralSettingsWindow {
     this._parent.logics.push({ priority: 20, action: this.searchBoxes });
     this._parent.logics.push({ priority: 30, action: this.npcStucksFallback });
     this._parent.logics.push({ priority: 40, action: this.randomMove });
+    this._parent.logics.push({ priority: 50, action: this.killNpcsLogic });
   }
 
   reviveLogic(){
@@ -236,6 +237,45 @@ class GeneralSettingsWindow {
     if(this.api.targetBoxHash == null && this.api.targetShip == null && window.movementDone && window.settings.moveRandomly) {
       this.x = MathUtils.random(100, 20732);
       this.y = MathUtils.random(58, 12830);
+    }
+  }
+
+  killNpcsLogic(){
+
+    let y;
+
+    if (this.api.targetShip && window.settings.killNpcs && this.api.targetBoxHash == null) {
+      this.api.targetShip.update();
+      var dist = this.api.targetShip.distanceTo(window.hero.position);
+
+      if ((dist > 600 && (this.api.lockedShip == null || this.api.lockedShip.id != this.api.targetShip.id) && $.now() - this.api.lastMovement > 1000)) {
+        this.x = this.api.targetShip.position.x - MathUtils.random(-50, 50);
+        this.y = this.api.targetShip.position.y - MathUtils.random(-50, 50);
+        this.api.lastMovement = $.now();
+      } else if (this.api.lockedShip && this.api.lockedShip.percentOfHp < 15 && this.api.lockedShip.id == this.api.targetShip.id && window.settings.dontCircleWhenHpBelow15Percent) {
+        if (dist > 450) {
+          this.x = this.api.targetShip.position.x + MathUtils.random(-30, 30);
+          this.y = this.api.targetShip.position.y + MathUtils.random(-30, 30);
+        }
+      } else if (dist > 300 && this.api.lockedShip && this.api.lockedShip.id == this.api.targetShip.id & !window.settings.circleNpc) {
+        this.x = this.api.targetShip.position.x + MathUtils.random(-200, 200);
+        this.y = this.api.targetShip.position.y + MathUtils.random(-200, 200);
+      } else if (this.api.lockedShip && this.api.lockedShip.id == this.api.targetShip.id) {
+        if (window.settings.circleNpc) {
+          //I'm not completely sure about this algorithm
+          let enemy = this.api.targetShip.position;
+          let f = Math.atan2(window.hero.position.x - enemy.x, window.hero.position.y - enemy.y) + 0.5;
+          let s = Math.PI / 180;
+          f += s;
+          this.x = enemy.x + window.settings.npcCircleRadius * Math.sin(f);
+          this.y = enemy.y + window.settings.npcCircleRadius * Math.cos(f);
+        }
+      } else { // ??? there must be something wrong with our locked npc
+        this.api.targetShip = null;
+        this.api.attacking = false;
+        this.api.triedToLock = false;
+        this.api.lockedShip = null;
+      }
     }
   }
 
