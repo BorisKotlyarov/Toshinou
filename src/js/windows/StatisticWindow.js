@@ -3,13 +3,25 @@ class StatisticWindow {
     createWindow() {
         this.botStatisticWindow = WindowFactory.createWindow({width: 300, text: "Statistic"});
         this.connected = false;
-        let startTime = new Date();
+
+        let defaultStat = {
+            startTime: new Date(),
+            credits: 0,
+            uridium: 0,
+            energy: 0,
+            ammo: 0,
+            experience: 0,
+            honor: 0,
+            speed: 0,
+        };
+
+        this.stats = Object.assign({}, defaultStat);
 
         let options = [
             {
                 name: 'startTime',
                 labelText: 'Start at: ',
-                spanText: startTime.toLocaleString(navigator.languages[0]),
+                spanText: this.stats.startTime.toLocaleString(navigator.languages[0]),
                 appendTo: this.botStatisticWindow
             },
             {
@@ -69,6 +81,11 @@ class StatisticWindow {
             this[option.name] = ControlFactory.info(option);
         });
 
+        this.resetBtn = ControlFactory.btn({
+            labelText: 'Reset',
+            appendTo: ControlFactory.emptyDiv(this.botStatisticWindow)
+        });
+        
         let standardListeners = [
             {event: 'addCredits', el: 'credits', detailEl: 'credits'},
             {event: 'addUridium', el: 'uridium', detailEl: 'uridium'},
@@ -82,18 +99,35 @@ class StatisticWindow {
             this.setStandardEventListener(item);
         });
 
+        $(this.resetBtn).on('click', (ev)=> {
+            ev.preventDefault(ev);
+
+            this.stats = Object.assign({}, defaultStat);
+            this.stats.startTime = new Date();
+
+            Object.keys(this.stats).forEach((item)=>{
+                let el = $('span:last-child', this[item]);
+
+                if('startTime' == item){
+                    el.html(this.stats[item].toLocaleString(navigator.languages[0]));
+                } else {
+                    el.html(this.stats[item]);
+                }
+            });
+        });
+        
         $(window).on('connection', (e)=> {
             this.connected = e.detail.connected;
         });
 
         $(window).on('logicEnd', ()=> {
             if (this.connected) {
-                let uri = parseInt($('span:last-child', this.uridium).html());
+
                 if (window.globalSettings.showRuntime) {
-                    $('span:last-child', this.runtime).text(TimeHelper.diff(startTime));
+                    $('span:last-child', this.runtime).text(TimeHelper.diff(this.stats.startTime));
                 }
 
-                $('span:last-child', this.speed).text(this.speedFormat(uri, startTime));
+                $('span:last-child', this.speed).text(this.speedFormat(this.stats.uridium, this.stats.startTime));
             }
         });
     }
@@ -118,8 +152,9 @@ class StatisticWindow {
         let htmlEl = this[el];
         $(window).on(event, (e)=> {
             let el = $('span:last-child', htmlEl);
-            let collected = parseInt(el.html());
-            el.text(parseInt(e.detail[detailEl]) + collected);
+            this.stats[detailEl] += parseInt(e.detail[detailEl]);
+            let collected = this.stats[detailEl];
+            el.text(collected);
         });
     }
 }

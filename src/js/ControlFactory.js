@@ -102,4 +102,14 @@ class ControlFactory {
         return {input, label};
     }
 
+    static emptyDiv(appendTo) {
+        return jQuery("<div>").appendTo(appendTo);
+    }
+
+    static btn({labelText, appendTo }){
+        let btn = jQuery("<button>", {class: 'btn'});
+        btn.html(labelText);
+        btn.appendTo(appendTo);
+        return btn;
+    }
 }

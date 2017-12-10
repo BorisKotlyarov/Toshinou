@@ -4,7 +4,7 @@ Created by Freshek on 07.10.2017
 
 class AssetRemovedHandler {
   static get ID() {
-    return 2047;
+    return 15882;
   }
 
   constructor() {

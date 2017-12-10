@@ -85,3 +85,15 @@
 .tabs .content.active {
     display: block;
 }
+
+.btn {
+    display: inline-block;
+    padding: 5px 10px;
+    color: #e8e1bf;
+    background-color: #15262e;
+    border: 1px solid rgb(40, 116, 144);
+}
+
+.btn:hover {
+    background-color: rgb(40, 116, 144);
+}

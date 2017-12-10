@@ -188,16 +188,16 @@ class BotWorker  {
       }
     }
 
-    if (api.targetBoxHash && $.now() - api.collectTime > 5000) {
-      let box = api.boxes[api.targetBoxHash];
-      if (box && box.distanceTo(window.hero.position) > 1000) {
-        api.collecTime = $.now();
-      } else {
-        delete api.boxes[api.targetBoxHash];
-        api.blackListHash(api.targetBoxHash);
-        api.targetBoxHash = null;
-      }
+  if (api.targetBoxHash && $.now() - api.collectTime > 5000) {
+    let box = api.boxes[api.targetBoxHash];
+    if (box && box.distanceTo(window.hero.position) > 1000) {
+      api.collecTime = $.now();
+    } else {
+      delete api.boxes[api.targetBoxHash];
+      api.blackListHash(api.targetBoxHash);
+      api.targetBoxHash = null;
     }
+  }
 
     //HACK: npc stucks fallback
     if (api.targetShip && $.now() - api.lockTime > 5000 && !api.attacking) {

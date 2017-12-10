@@ -4,7 +4,7 @@ Created on 04.11.2017 by Freshek
 
 class ShipSelectedHandler {
   static get ID() {
-    return 20164;
+    return 11261;
   }
 
   constructor() {

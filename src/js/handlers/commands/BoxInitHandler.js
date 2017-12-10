@@ -4,7 +4,7 @@ Created by Freshek on 07.10.2017
 
 class BoxInitHandler {
   static get ID() {
-    return 10058;
+    return 32089;
   }
 
   constructor() {
