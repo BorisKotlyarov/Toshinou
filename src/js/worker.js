@@ -9,6 +9,7 @@ class BotWorker  {
   constructor() {
 
     this.logics = [];
+    this.windows = {};
 
     api = new Api();
 
@@ -82,8 +83,9 @@ class BotWorker  {
 
     Object.keys(windowsObjects).forEach((item)=>{
       let CLassName = windowsObjects[item].class;
-      window[item] = new CLassName(windowsObjects[item].args);
-      window[item].createWindow();
+      windowsObjects[item].args['parent'] = this;
+      this.windows[item] = new CLassName(windowsObjects[item].args);
+      this.windows[item].createWindow();
     });
 
     Injector.injectScriptFromResource("res/injectables/HeroPositionUpdater.js");
@@ -132,10 +134,11 @@ class BotWorker  {
     });
 
     priorityLogic.forEach((logic)=>{
-      logic.bind(this);
+      logic.action.call(this);
     });
 
-    window.minimap.draw();
+    
+    //window.minimap.draw();
 
     if (api.targetBoxHash == null && api.targetShip == null) {
       if (MathUtils.percentFrom(window.hero.hp, window.hero.maxHp) < window.settings.repairWhenHpIsLowerThanPercent) {

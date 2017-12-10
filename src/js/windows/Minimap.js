@@ -3,8 +3,9 @@ Created by Freshek on 07.10.2017
 */
 
 class Minimap {
-  constructor(a) {
-    this._api = a;
+  constructor(options) {
+    this._api = options;
+    this._parent = options.parent;
   }
 
   createWindow() {
@@ -20,6 +21,13 @@ class Minimap {
     this.canvas.appendTo(this.minimap);
 
     var self = this;
+
+    let logic = {
+      priority: 0,
+      action: ()=>{ self.draw.call(self); },
+    };
+
+    this._parent.logics.push(logic);
 
     this.canvas.click(function(e) {
       var pos = self.minimap.position();
