@@ -146,6 +146,7 @@ class GeneralSettingsWindow {
 
     this._parent.logics.push({ priority: 0, action: this.reviveLogic });
     this._parent.logics.push({ priority: 10, action: this.killNpcsLogic });
+    this._parent.logics.push({ priority: 20, action: this.searchBoxes });
   }
 
   reviveLogic(){
@@ -202,6 +203,19 @@ class GeneralSettingsWindow {
         this.api.lastAttack = $.now();
         this.api.attacking = true;
         return;
+      }
+    }
+  }
+
+  searchBoxes(){
+    if (this.api.targetBoxHash && $.now() - this.api.collectTime > 5000) {
+      let box = this.api.boxes[this.api.targetBoxHash];
+      if (box && box.distanceTo(window.hero.position) > 1000) {
+        this.api.collecTime = $.now();
+      } else {
+        delete this.api.boxes[this.api.targetBoxHash];
+        this.api.blackListHash(this.api.targetBoxHash);
+        this.api.targetBoxHash = null;
       }
     }
   }

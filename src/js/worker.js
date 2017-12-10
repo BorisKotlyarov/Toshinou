@@ -137,17 +137,6 @@ class BotWorker  {
       logic.action.call(this);
     });
 
-  if (this.api.targetBoxHash && $.now() - this.api.collectTime > 5000) {
-    let box = this.api.boxes[this.api.targetBoxHash];
-    if (box && box.distanceTo(window.hero.position) > 1000) {
-      this.api.collecTime = $.now();
-    } else {
-      delete this.api.boxes[this.api.targetBoxHash];
-      this.api.blackListHash(this.api.targetBoxHash);
-      this.api.targetBoxHash = null;
-    }
-  }
-
   //HACK: npc stucks fallback
   if ((this.api.targetShip && $.now() - this.api.lockTime > 5000 && !this.api.attacking) || $.now() - this.api.lastAttack > 25000) {
     this.api.targetShip = null;
