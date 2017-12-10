@@ -32,8 +32,8 @@ class HeroInitHandler {
       window.hero.maxShd = heroJson[Variables.heroInitMaxShd];
       window.hero.shd = heroJson["shield"];
 
-      f();
-      window.initialized = true;
+      window.BotWorkerInstance.init();
+      window.BotWorkerInstance.initialized = true;
     }
   }
 
