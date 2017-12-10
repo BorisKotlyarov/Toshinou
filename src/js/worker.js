@@ -137,21 +137,9 @@ class BotWorker  {
       logic.action.call(this);
     });
 
-  //HACK: npc stucks fallback
-  if ((this.api.targetShip && $.now() - this.api.lockTime > 5000 && !this.api.attacking) || $.now() - this.api.lastAttack > 25000) {
-    this.api.targetShip = null;
-    this.api.attacking = false;
-    this.api.triedToLock = false;
-    this.api.lockedShip = null;
-  }
-
     var x;
     var y;
 
-    if (this.api.targetBoxHash == null && this.api.targetShip == null && window.movementDone && window.settings.moveRandomly) {
-      x = MathUtils.random(100, 20732);
-      y = MathUtils.random(58, 12830);
-    }
 
     if (this.api.targetShip && window.settings.killNpcs && this.api.targetBoxHash == null) {
       this.api.targetShip.update();
@@ -187,8 +175,8 @@ class BotWorker  {
       }
     }
 
-    if (x && y) {
-      this.api.move(x, y);
+    if (this.x && this.y) {
+      this.api.move(this.x, this.y);
       window.movementDone = false;
     }
 

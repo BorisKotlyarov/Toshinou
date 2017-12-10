@@ -145,8 +145,10 @@ class GeneralSettingsWindow {
     });
 
     this._parent.logics.push({ priority: 0, action: this.reviveLogic });
-    this._parent.logics.push({ priority: 10, action: this.killNpcsLogic });
+    this._parent.logics.push({ priority: 10, action: this.searchNpcsLogic });
     this._parent.logics.push({ priority: 20, action: this.searchBoxes });
+    this._parent.logics.push({ priority: 30, action: this.npcStucksFallback });
+    this._parent.logics.push({ priority: 40, action: this.randomMove });
   }
 
   reviveLogic(){
@@ -186,7 +188,7 @@ class GeneralSettingsWindow {
 
   }
 
-  killNpcsLogic(){
+  searchNpcsLogic(){
     if (this.api.targetShip && window.settings.killNpcs) {
       if (!this.api.triedToLock && (this.api.lockedShip == null || this.api.lockedShip.id != this.api.targetShip.id)) {
         this.api.targetShip.update();
@@ -217,6 +219,23 @@ class GeneralSettingsWindow {
         this.api.blackListHash(this.api.targetBoxHash);
         this.api.targetBoxHash = null;
       }
+    }
+  }
+
+  npcStucksFallback(){
+    //HACK: npc stucks fallback
+    if ((this.api.targetShip && $.now() - this.api.lockTime > 5000 && !this.api.attacking) || $.now() - this.api.lastAttack > 25000) {
+      this.api.targetShip = null;
+      this.api.attacking = false;
+      this.api.triedToLock = false;
+      this.api.lockedShip = null;
+    }
+  }
+
+  randomMove(){
+    if(this.api.targetBoxHash == null && this.api.targetShip == null && window.movementDone && window.settings.moveRandomly) {
+      this.x = MathUtils.random(100, 20732);
+      this.y = MathUtils.random(58, 12830);
     }
   }
 
