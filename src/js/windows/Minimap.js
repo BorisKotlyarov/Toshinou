@@ -20,14 +20,13 @@ class Minimap {
 
     this.canvas.appendTo(this.minimap);
 
-    var self = this;
+    let self = this;
 
-    let logic = {
-      priority: 0,
-      action: ()=>{ self.draw.call(self); },
-    };
+    let logicName = 'drawMap';
+    let action = ()=>{ self.draw.call(self); /* call own instance */ };
+    let priority = 0;
 
-    this._parent.logics.push(logic);
+    this._parent.addLogic(logicName, action, priority);
 
     this.canvas.click(function(e) {
       var pos = self.minimap.position();

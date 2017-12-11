@@ -42,14 +42,35 @@ class GGWindow {
 
     window.settings.ggDistance = this.ggDistance.value;
 
-    this._parent.logics.push({ priority: 0, action: this.ggLogicBefore });
-    this._parent.logics.push({ priority: 60, action: this.ggLogic });
+/*    this._parent.logics.push({ priority: 0, action: this.ggLogicBefore });
+    this._parent.logics.push({ priority: 60, action: this.ggLogic });*/
 
   }
 
   ggLogicBefore(){
     if(this.enemyAngle===undefined){
       this.enemyAngle = 0;
+    }
+  }
+
+  searchNpcsLogic(){
+    if (this.api.targetShip && window.settings.killNpcs) {
+      if (!this.api.triedToLock && (this.api.lockedShip == null || this.api.lockedShip.id != this.api.targetShip.id)) {
+        this.api.targetShip.update();
+        
+        var dist = this.api.targetShip.distanceTo(window.hero.position);
+        
+        this.api.lockShip(this.api.targetShip);
+        this.api.triedToLock = true;
+        return;
+      }
+
+      if (!this.api.attacking && this.api.lockedShip) {
+        this.api.startLaserAttack();
+        this.api.lastAttack = $.now();
+        this.api.attacking = true;
+        return;
+      }
     }
   }
 

@@ -17,9 +17,9 @@ class ShipAttackHandler {
       let ship = a.ships[attackedShipId];
 
       if (attackerId == window.hero.id) {
-        window.attackWindow.hp(shipAttackCmd[Variables.attackHp]);
-        window.attackWindow.shd(shipAttackCmd[Variables.attackShd]);
-        window.attackWindow.targetName(ship.name);
+        BotWorkerInstance.windows.attackWindow.hp(shipAttackCmd[Variables.attackHp]);
+        BotWorkerInstance.windows.attackWindow.shd(shipAttackCmd[Variables.attackShd]);
+        BotWorkerInstance.windows.attackWindow.targetName(ship.name);
       }
 
       if (attackedShipId == window.hero.id) {
@@ -27,8 +27,8 @@ class ShipAttackHandler {
         window.hero.shd = shipAttackCmd[Variables.attackShd];
       }
 
-      if (api.targetShip && attackedShipId == api.targetShip.id) {
-        api.lastAttack = $.now();
+      if (a.targetShip && attackedShipId == a.targetShip.id) {
+        a.lastAttack = $.now();
       }
 
       if (ship) {

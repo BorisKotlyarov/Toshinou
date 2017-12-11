@@ -141,7 +141,7 @@ class BotWorker  {
     });
 
     priorityLogic.forEach((logic)=>{
-      logic.action.call(this);
+      this[logic.name]();
     });
 
     if (this.x && this.y) {
@@ -150,6 +150,49 @@ class BotWorker  {
     }
 
     window.dispatchEvent(new CustomEvent("logicEnd",{ detail: { worker: this } }));
+  }
+
+  /**
+   *
+   * @param name {string}
+   * @param action {function}
+   * @param priority {number}
+   *
+   * @description add an "action" to the work cycle
+     */
+  addLogic(name, action, priority) {
+    this[name] = action;
+    this.logics.push({name, priority });
+  }
+
+  /**
+   *
+   * @param name {string}
+   *
+   * @description remove an "action" from the work cycle
+     */
+  removeLogic(name) {
+    delete this[name];
+    let index = this.logics.findIndex(i => i.name === name);
+    this.logics.splice(index, 1);
+  }
+
+  /**
+   *
+   * @param toggle {boolean}
+   * @param name {string}
+   * @param action {function}
+   * @param priority {number}
+   *
+   * @description add or remove an "action" from the work cycle
+   *
+     */
+  toggleLogic({toggle = true, name, action, priority}){
+    if(toggle){
+      this.addLogic(name, action, priority);
+    } else {
+      this.removeLogic(name);
+    }
   }
 
 }

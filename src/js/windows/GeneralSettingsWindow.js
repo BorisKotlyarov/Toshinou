@@ -11,6 +11,8 @@ class GeneralSettingsWindow {
   createWindow() {
     this.botSettingsWindow = WindowFactory.createWindow({width: 300, text: "General"});
 
+    let self = this;
+
     let controls = [
       {
         name: 'collectBoxes',
@@ -18,6 +20,19 @@ class GeneralSettingsWindow {
         appendTo: this.botSettingsWindow,
         event: function () {
           window.settings.collectBoxes = this.checked;
+
+          if(!window.settings.collectBoxes){
+
+            let toggleLogicOpt = {
+              toggle: this.checked,
+              name: 'collectBoxesLogic',
+              action: self.collectBoxesLogic,
+              priority: 10,
+            };
+
+            self._parent.toggleLogic(toggleLogicOpt);
+          }
+
         }
       },
       {
@@ -26,6 +41,19 @@ class GeneralSettingsWindow {
         appendTo: this.botSettingsWindow,
         event: function () {
           window.settings.collectMaterials = this.checked;
+
+          if(!window.settings.collectBoxes){
+
+            let toggleLogicOpt = {
+              toggle: this.checked,
+              name: 'collectBoxesLogic',
+              action: self.collectBoxesLogic,
+              priority: 10,
+            };
+
+            self._parent.toggleLogic(toggleLogicOpt);
+          }
+
         }
       },
       {
@@ -33,7 +61,16 @@ class GeneralSettingsWindow {
         labelText: 'Move randomly',
         appendTo: this.botSettingsWindow,
         event: function () {
-          window.settings.moveRandomly = this.checked;
+
+          let toggleLogicOpt = {
+            toggle: this.checked,
+            name: 'randomMoveLogic',
+            action: self.randomMoveLogic,
+            priority: 40,
+          };
+
+          self._parent.toggleLogic(toggleLogicOpt);
+
         }
       },
       {
@@ -42,6 +79,33 @@ class GeneralSettingsWindow {
         appendTo: this.botSettingsWindow,
         event: function () {
           window.settings.killNpcs = this.checked;
+
+          let toggleLogicOpts = [
+            {
+              toggle: this.checked,
+              name: 'searchNpcsLogic',
+              action: self.searchNpcsLogic,
+              priority: 10,
+            },
+            {
+              toggle: this.checked,
+              name: 'npcStucksFallback',
+              action: self.npcStucksFallback,
+              priority: 30,
+            },
+            {
+              toggle: this.checked,
+              name: 'killNpcsLogic',
+              action: self.killNpcsLogic,
+              priority: 50,
+            },
+
+          ];
+
+          toggleLogicOpts.forEach((toggleLogicOpt)=>{
+            self._parent.toggleLogic(toggleLogicOpt);
+          });
+
         }
       },
       {
@@ -121,7 +185,6 @@ class GeneralSettingsWindow {
           window.settings.reviveAtGate = this.checked;
         }
       },
-
       {
         name: 'reviveLimit',
         labelText: 'Revive limit <span> (5)</span>',
@@ -139,44 +202,32 @@ class GeneralSettingsWindow {
           $('span:last-child', this.label).text(' (' + this.value + ')');
         }
       },
-      {
-        name: 'noddGate',
-        labelText: 'Не добивать',
-        appendTo: this.botSettingsWindow,
-        event: function () {
-          window.settings.noddGate = this.checked;
-        }
-      },
     ];
 
     controls.forEach((control)=>{
       this[control.name] = ControlFactory.createControl(control);
     });
 
-    this._parent.logics.push({ priority: 0, action: this.reviveLogic });
-    this._parent.logics.push({ priority: 10, action: this.searchNpcsLogic });
-    this._parent.logics.push({ priority: 20, action: this.searchBoxes });
-    this._parent.logics.push({ priority: 30, action: this.npcStucksFallback });
-    this._parent.logics.push({ priority: 40, action: this.randomMove });
-    this._parent.logics.push({ priority: 50, action: this.killNpcsLogic });
+    this._parent.addLogic('repairLogic', this.repairLogic, 1);
+
   }
 
-  reviveLogic(){
 
+  collectBoxesLogic(){
     if (this.api.targetBoxHash == null && this.api.targetShip == null) {
-      if (MathUtils.percentFrom(window.hero.hp, window.hero.maxHp) < window.settings.repairWhenHpIsLowerThanPercent) {
-        let gate = this.api.findNearestGate();
-        if (gate.gate) {
-          let x = gate.gate.position.x;
-          let y = gate.gate.position.y;
-          this.api.isRepairing = true;
-          this.api.move(x, y);
-          window.movementDone = false;
-          return;
-        }
+      var box = this.api.findNearestBox();
+
+      if(box.box) {
+        this.api.collectBox(box.box);
+        this.api.targetBoxHash = box.box.hash;
+        return;
       }
 
+    }
+
+   /* if (this.api.targetBoxHash == null && this.api.targetShip == null) {
       var box = this.api.findNearestBox();
+
       var ship = this.api.findNearestShip();
 
       if ((ship.distance > 1000 || !ship.ship) && (box.box)) {
@@ -194,32 +245,8 @@ class GeneralSettingsWindow {
         this.api.targetShip = ship.ship;
         return;
       }
-    }
+    }*/
 
-  }
-
-  searchNpcsLogic(){
-    if (this.api.targetShip && window.settings.killNpcs) {
-      if (!this.api.triedToLock && (this.api.lockedShip == null || this.api.lockedShip.id != this.api.targetShip.id)) {
-        this.api.targetShip.update();
-        var dist = this.api.targetShip.distanceTo(window.hero.position);
-        if (dist < 600) {
-          this.api.lockShip(this.api.targetShip);
-          this.api.triedToLock = true;
-          return;
-        }
-      }
-
-      if (!this.api.attacking && this.api.lockedShip) {
-        this.api.startLaserAttack();
-        this.api.lastAttack = $.now();
-        this.api.attacking = true;
-        return;
-      }
-    }
-  }
-
-  searchBoxes(){
     if (this.api.targetBoxHash && $.now() - this.api.collectTime > 5000) {
       let box = this.api.boxes[this.api.targetBoxHash];
       if (box && box.distanceTo(window.hero.position) > 1000) {
@@ -230,9 +257,66 @@ class GeneralSettingsWindow {
         this.api.targetBoxHash = null;
       }
     }
+
   }
 
-  npcStucksFallback(){
+  repairLogic(){
+    if (MathUtils.percentFrom(window.hero.hp, window.hero.maxHp) < window.settings.repairWhenHpIsLowerThanPercent) {
+      let gate = this.api.findNearestGate();
+      if (gate.gate) {
+        let x = gate.gate.position.x;
+        let y = gate.gate.position.y;
+        this.api.isRepairing = true;
+        this.api.move(x, y);
+        window.movementDone = false;
+        return;
+      }
+    }
+  }
+
+  searchNpcsLogic(){
+
+     if (this.api.targetShip == null) {
+
+       var ship = this.api.findNearestShip();
+
+       if (ship.ship && ship.distance < 1000) {
+
+         this.api.lockShip(ship.ship);
+         this.api.triedToLock = true;
+         this.api.targetShip = ship.ship;
+         return;
+
+       } else if (ship.ship) {
+         ship.ship.update();
+         this.api.move(ship.ship.position.x - MathUtils.random(-50, 50), ship.ship.position.y - MathUtils.random(-50, 50));
+         this.api.targetShip = ship.ship;
+         return;
+       }
+
+     } else {
+
+       if (!this.api.triedToLock && (this.api.lockedShip == null || this.api.lockedShip.id != this.api.targetShip.id)) {
+         this.api.targetShip.update();
+         var dist = this.api.targetShip.distanceTo(window.hero.position);
+         if (dist < 600) {
+           this.api.lockShip(this.api.targetShip);
+           this.api.triedToLock = true;
+           return;
+         }
+       }
+
+       if (!this.api.attacking && this.api.lockedShip) {
+         this.api.startLaserAttack();
+         this.api.lastAttack = $.now();
+         this.api.attacking = true;
+         return;
+       }
+
+     }
+  }
+
+  npcStucksFallback() {
     //HACK: npc stucks fallback
     if ((this.api.targetShip && $.now() - this.api.lockTime > 5000 && !this.api.attacking) || $.now() - this.api.lastAttack > 25000) {
       this.api.targetShip = null;
@@ -242,8 +326,8 @@ class GeneralSettingsWindow {
     }
   }
 
-  randomMove(){
-    if(this.api.targetBoxHash == null && this.api.targetShip == null && window.movementDone && window.settings.moveRandomly) {
+  randomMoveLogic(){
+    if(this.api.targetBoxHash == null && this.api.targetShip == null && window.movementDone) {
       this.x = MathUtils.random(100, this.map.width);
       this.y = MathUtils.random(58, this.map.heigth);
     }
@@ -251,7 +335,7 @@ class GeneralSettingsWindow {
 
   killNpcsLogic(){
 
-    if (this.api.targetShip && window.settings.killNpcs && this.api.targetBoxHash == null) {
+    if (this.api.targetShip && this.api.targetBoxHash == null) {
       this.api.targetShip.update();
       var dist = this.api.targetShip.distanceTo(window.hero.position);
 
@@ -284,11 +368,6 @@ class GeneralSettingsWindow {
         this.api.lockedShip = null;
       }
     }
-
-    if(window.settings.noddGate && this.api.lockedShip.percentOfHp < 15){
-      window.settings.noddGate
-    }
-
   }
 
 }
