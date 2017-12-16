@@ -7,12 +7,22 @@ class GGWindow {
   createWindow() {
     this.ggWindow = WindowFactory.createWindow({width: 300, text: "GG Helper"});
 
+    let self = this;
+
     let controls = [
       {
         name: 'ggAlgorithm',
         labelText: 'GG algorithm',
         appendTo: this.ggWindow,
         event: function () {
+
+          self._parent.toggleLogic({
+            toggle: this.checked,
+            name: 'searchNpcsLogic',
+            action: self.searchNpcsLogic,
+            priority: 10,
+          });
+
           window.settings.ggAlgorithm = this.checked;
         }
       },
@@ -42,8 +52,25 @@ class GGWindow {
 
     window.settings.ggDistance = this.ggDistance.value;
 
-/*    this._parent.logics.push({ priority: 0, action: this.ggLogicBefore });
-    this._parent.logics.push({ priority: 60, action: this.ggLogic });*/
+    this._parent.addLogic('ggLogicBefore', this.ggLogicBefore, 1);
+    this._parent.addLogic('ggLogic', this.ggLogic, 20);
+
+  }
+
+  ggClearLock(){
+    if(this.api.lockedShip && this.api.lockedShip.percentOfHp < 20){
+      this.api.targetShip = null;
+      this.api.attacking = false;
+      this.api.triedToLock = false;
+      this.api.lockedShip = null;
+    }
+
+    if ((this.api.targetShip && $.now() - this.api.lockTime > 5000 && !this.api.attacking) || $.now() - this.api.lastAttack > 25000) {
+      this.api.targetShip = null;
+      this.api.attacking = false;
+      this.api.triedToLock = false;
+      this.api.lockedShip = null;
+    }
 
   }
 
@@ -54,15 +81,35 @@ class GGWindow {
   }
 
   searchNpcsLogic(){
-    if (this.api.targetShip && window.settings.killNpcs) {
+
+    if (this.api.targetShip == null) {
+
+      var ship = this.api.findNearestShip();
+
+      if (ship.ship && ship.distance < 1000) {
+
+        this.api.lockShip(ship.ship);
+        this.api.triedToLock = true;
+        this.api.targetShip = ship.ship;
+        return;
+
+      } else if (ship.ship) {
+        ship.ship.update();
+        this.api.move(ship.ship.position.x - MathUtils.random(-50, 50), ship.ship.position.y - MathUtils.random(-50, 50));
+        this.api.targetShip = ship.ship;
+        return;
+      }
+
+    } else {
+
       if (!this.api.triedToLock && (this.api.lockedShip == null || this.api.lockedShip.id != this.api.targetShip.id)) {
         this.api.targetShip.update();
-        
         var dist = this.api.targetShip.distanceTo(window.hero.position);
-        
-        this.api.lockShip(this.api.targetShip);
-        this.api.triedToLock = true;
-        return;
+        if (dist < 600) {
+          this.api.lockShip(this.api.targetShip);
+          this.api.triedToLock = true;
+          return;
+        }
       }
 
       if (!this.api.attacking && this.api.lockedShip) {
@@ -71,6 +118,7 @@ class GGWindow {
         this.api.attacking = true;
         return;
       }
+
     }
   }
 
