@@ -71,6 +71,7 @@ class NpcSettingsWindow {
       "( Uber Saboteur )",
       "( Uber Annihilator )",
       "( Uber Battleray )",
+      "-=[ Referee-Bot ]=-",
       "<=< Icy >=>",
       "<=< Ice Meteoroid >=>",
       "<=< Super Ice Meteoroid >=>",
