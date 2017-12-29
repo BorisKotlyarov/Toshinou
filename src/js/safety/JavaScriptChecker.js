@@ -27,7 +27,7 @@ class JavaScriptChecker {
       result = false;
 
     scripts.each(function() {
-      if (this.src != null && this.src.length != 0) {
+      if (this.src != null && this.src.length != 0 && !this.src.startsWith("https://www.googletagmanager.com/gtm.js")) {
         var script = WebClient.get(this.src);
 
         var hash = md5(script);
